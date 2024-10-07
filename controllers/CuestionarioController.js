@@ -39,7 +39,6 @@ const obtenerCuestionariosResueltos = async (idUsuario, countryId) => {
   }));
 };
 
-
 const obtenerCuestionariosNoResueltos = async (idUsuario, countryId) => {
   const noResueltos = await Cuestionarios.findAll({
     include: [
@@ -78,7 +77,6 @@ const obtenerCuestionariosNoResueltos = async (idUsuario, countryId) => {
     idTipoCuestionario: cuestionario.idTipoCuestionario,
   }));
 };
-
 
 const getCuestionarios = async (req, res) => {
   try {
