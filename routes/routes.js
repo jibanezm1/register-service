@@ -2,7 +2,7 @@ const express = require("express");
 const {
   getCuestionarios,
   getDetalleCuestionario,
-} = require("../controllers/cuestionarioController");
+} = require("../controllers/CuestionarioController");
 const { verifyToken } = require("../controllers/userController");
 
 const router = express.Router();

@@ -37,7 +37,7 @@ app.use("/api", cuestionarioRoutes);
 app.use('/api/respuestas', respuestaRoutes);
 
 // Iniciar el servidor
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 3010;
 app.listen(PORT, () => {
   console.log("Server is running on port", PORT);
 });
