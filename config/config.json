@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "doadmin",
+    "password": "Casa123___123",
+    "database": "yoelijodigital",
+    "host": "kautapp-db-do-user-16587720-0.c.db.ondigitalocean.com",
+    "port": 25060,
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "doadmin",
+    "password": "Casa123___123",
+    "database": "yoelijodigital",
+    "host": "kautapp-db-do-user-16587720-0.c.db.ondigitalocean.com",
+    "port": 25060,
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "doadmin",
+    "password": "Casa123___123",
+    "database": "yoelijodigital",
+    "host": "kautapp-db-do-user-16587720-0.c.db.ondigitalocean.com",
+    "port": 25060,
+    "dialect": "mysql"
+  }
+}
