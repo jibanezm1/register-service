@@ -43,8 +43,6 @@ exports.registerUser = [
     if (!email) missingFields.push("email");
     if (!password) missingFields.push("password");
     if (!telefono) missingFields.push("telefono");
-    if (!req.files || !req.files.dniFront) missingFields.push("dniFront");
-    if (!req.files || !req.files.dniBack) missingFields.push("dniBack");
     if (!fechaNacimiento) missingFields.push("fechaNacimiento");
 
     if (missingFields.length > 0) {
@@ -72,7 +70,7 @@ exports.registerUser = [
       const hashedPassword = await bcrypt.hash(password, 10);
       country_id = 2;
 
-      // Upload DNI images to DigitalOcean Spaces
+      // Upload DNI images to DigitalOcean Spaces (if they exist)
       const uploadToSpaces = async (fileBuffer, fileName) => {
         const uploadParams = {
           Bucket: "yoelijobolivia",
@@ -90,17 +88,24 @@ exports.registerUser = [
         return result.Location;
       };
 
-      const dniFrontBuffer = req.files.dniFront[0].buffer;
-      const dniBackBuffer = req.files.dniBack[0].buffer;
+      let dniFrontUrl = null;
+      let dniBackUrl = null;
 
-      const dniFrontUrl = await uploadToSpaces(
-        dniFrontBuffer,
-        `dniFront_${Date.now()}.jpg`
-      );
-      const dniBackUrl = await uploadToSpaces(
-        dniBackBuffer,
-        `dniBack_${Date.now()}.jpg`
-      );
+      if (req.files && req.files.dniFront) {
+        const dniFrontBuffer = req.files.dniFront[0].buffer;
+        dniFrontUrl = await uploadToSpaces(
+          dniFrontBuffer,
+          `dniFront_${Date.now()}.jpg`
+        );
+      }
+
+      if (req.files && req.files.dniBack) {
+        const dniBackBuffer = req.files.dniBack[0].buffer;
+        dniBackUrl = await uploadToSpaces(
+          dniBackBuffer,
+          `dniBack_${Date.now()}.jpg`
+        );
+      }
 
       // Create user
       const user = await Usuarios.create({
@@ -110,8 +115,8 @@ exports.registerUser = [
         telefono,
         clave: hashedPassword,
         country_id,
-        dni_front_path: dniFrontUrl,
-        dni_back_path: dniBackUrl,
+        dni_front_path: dniFrontUrl, // May be null if not uploaded
+        dni_back_path: dniBackUrl, // May be null if not uploaded
         fechaNacimiento,
         status: 1,
         idPerfil: 1,
@@ -202,7 +207,7 @@ exports.verifyToken = (req, res, next) => {
       .json({ status: "error", message: "Token no proporcionado" });
   }
 
-  jwt.verify(token.split(' ')[1], process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token.split(" ")[1], process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res
         .status(401)
