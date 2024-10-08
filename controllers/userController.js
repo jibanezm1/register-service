@@ -34,6 +34,7 @@ exports.registerUser = [
       telefono,
       country,
       fechaNacimiento,
+      dni, // Añadir el campo dni aquí
     } = req.body;
 
     const missingFields = [];
@@ -44,6 +45,7 @@ exports.registerUser = [
     if (!password) missingFields.push("password");
     if (!telefono) missingFields.push("telefono");
     if (!fechaNacimiento) missingFields.push("fechaNacimiento");
+    if (!dni) missingFields.push("dni"); // Validar el dni
 
     if (missingFields.length > 0) {
       return res.status(400).json({
@@ -55,7 +57,7 @@ exports.registerUser = [
     }
 
     try {
-      // Check if user already exists
+      // Verificar si el usuario ya existe
       const existingUser = await Usuarios.findOne({ where: { email } });
       if (existingUser) {
         return res.status(400).json({
@@ -66,11 +68,11 @@ exports.registerUser = [
 
       console.log("req.files", req.files);
 
-      // Hash the password
+      // Hashear la contraseña
       const hashedPassword = await bcrypt.hash(password, 10);
       country_id = 2;
 
-      // Upload DNI images to DigitalOcean Spaces (if they exist)
+      // Subir imágenes de DNI a DigitalOcean Spaces
       const uploadToSpaces = async (fileBuffer, fileName) => {
         const uploadParams = {
           Bucket: "yoelijobolivia",
@@ -107,7 +109,7 @@ exports.registerUser = [
         );
       }
 
-      // Create user
+      // Crear el usuario
       const user = await Usuarios.create({
         nombre,
         apellidos,
@@ -115,14 +117,15 @@ exports.registerUser = [
         telefono,
         clave: hashedPassword,
         country_id,
-        dni_front_path: dniFrontUrl, // May be null if not uploaded
-        dni_back_path: dniBackUrl, // May be null if not uploaded
+        dni_front_path: dniFrontUrl, // Puede ser null si no se subió
+        dni_back_path: dniBackUrl, // Puede ser null si no se subió
         fechaNacimiento,
+        dni, // Añadir el campo dni aquí
         status: 1,
         idPerfil: 1,
       });
 
-      // Generate JWT token
+      // Generar el token JWT
       const token = jwt.sign({ id: user.idUsuario }, process.env.JWT_SECRET, {
         expiresIn: "1d",
       });

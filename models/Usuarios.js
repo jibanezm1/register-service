@@ -73,6 +73,10 @@ module.exports = function(sequelize, DataTypes) {
     fechaNacimiento: {
       type: DataTypes.DATEONLY,
       allowNull: true
+    },
+    dni: {
+      type: DataTypes.STRING(100), // Añadir el campo dni aquí
+      allowNull: true
     }
   }, {
     sequelize,
