@@ -43,7 +43,6 @@ exports.registerUser = [
     if (!apellidos) missingFields.push("apellidos");
     if (!email) missingFields.push("email");
     if (!password) missingFields.push("password");
-    if (!telefono) missingFields.push("telefono");
     if (!fechaNacimiento) missingFields.push("fechaNacimiento");
     if (!dni) missingFields.push("dni"); // Validar el dni
 
@@ -114,7 +113,7 @@ exports.registerUser = [
         nombre,
         apellidos,
         email,
-        telefono,
+        telefono: telefono || 0, // Si telefono no viene, poner 0
         clave: hashedPassword,
         country_id,
         dni_front_path: dniFrontUrl, // Puede ser null si no se subió
