@@ -12,8 +12,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// Importar modelos y asociaciones
-
 // Conectar y sincronizar la base de datos
 sequelize
   .authenticate()
@@ -33,6 +31,7 @@ sequelize
 // Rutas de la API
 app.post("/register", userController.registerUser);
 app.post("/login", userController.loginUser);
+app.post("/verify-code", userController.verifyCode); // Añadir endpoint de validación de código
 app.use("/api", cuestionarioRoutes);
 app.use('/api/respuestas', respuestaRoutes);
 
