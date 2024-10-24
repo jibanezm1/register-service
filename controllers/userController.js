@@ -140,6 +140,7 @@ exports.registerUser = [
 
       // Guardar el código de verificación en la base de datos (puedes agregar una columna para este código)
       user.verification_code = verificationCode;
+      console.log("verificationCode", verificationCode);
       await user.save();
 
       // Configurar el correo electrónico
