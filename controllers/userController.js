@@ -151,12 +151,16 @@ exports.registerUser = [
         .setFrom(sentFrom)
         .setTo(recipients)
         .setSubject("Código de Verificación")
-        .setHtml(
-          `<p>Hola ${nombre},</p><p>Tu código de verificación es: <strong>${verificationCode}</strong></p>`
-        )
-        .setText(
-          `Hola ${nombre}, tu código de verificación es: ${verificationCode}`
-        );
+        .setTemplateId("0p7kx4xvx0el9yjr") // Configurar la plantilla de correo
+        .setVariables([
+          {
+            email: email,
+            substitutions: {
+              variable1: nombre, // Se enviará como `name`
+              variable2: verificationCode, // Se enviará como `code`
+            },
+          },
+        ]);
 
       // Enviar el correo con MailerSend
       try {
