@@ -142,31 +142,64 @@ exports.registerUser = [
       user.verification_code = verificationCode;
       console.log("verificationCode", verificationCode);
       await user.save();
-
-      // Configurar el correo electrónico
+      // Configurar el destinatario
       const recipients = [new Recipient(email, `${nombre} ${apellidos}`)];
-      const sentFrom = new Sender("info@yoelijo.digital", "YoElijo.digital");
 
-      const emailParams = new EmailParams()
-        .setFrom(sentFrom)
-        .setTo(recipients)
-        .setSubject("Código de Verificación")
-        .setTemplateId("0p7kx4xvx0el9yjr") // Configurar la plantilla de correo
-        .setVariables([
+      // Configurar los parámetros del correo electrónico
+      const emailParams = new EmailParams({
+        from: "info@yoelijo.digital", // Dirección de correo sin objeto
+        fromName: "YoElijo.digital",
+        to: recipients, // Lista de destinatarios
+        subject: "Código de Verificación",
+        template_id: "0p7kx4xvx0el9yjr",
+        variables: [
           {
             email: email,
-            substitutions: {
-              variable1: nombre, // Se enviará como `name`
-              variable2: verificationCode, // Se enviará como `code`
-            },
+            substitutions: [
+              {
+                var: "variable1",
+                value: nombre,
+              },
+              {
+                var: "variable2",
+                value: verificationCode,
+              },
+            ],
           },
-        ]);
+        ],
+      });
 
       // Enviar el correo con MailerSend
       try {
         await mailerSend.email.send(emailParams);
         console.log("Correo enviado correctamente");
       } catch (error) {
+        console.log("Curl command:");
+        console.log(`curl -X POST https://api.mailersend.com/v1/email \
+        -H "Authorization: Bearer ${process.env.TOKENMAIL}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "from": {
+            "email": "info@yoelijo.digital",
+            "name": "YoElijo.digital"
+          },
+          "to": [{
+            "email": "${email}",
+            "name": "${nombre} ${apellidos}"
+          }],
+          "subject": "Código de Verificación",
+          "template_id": "0p7kx4xvx0el9yjr",
+          "variables": [{
+            "email": "${email}",
+            "substitutions": [{
+              "var": "variable1",
+              "value": "${nombre}"
+            }, {
+              "var": "variable2",
+              "value": "${verificationCode}"
+            }]
+          }]
+        }'`);
         console.error("Error enviando el correo:", error);
         return res.status(500).json({
           status: "error",
