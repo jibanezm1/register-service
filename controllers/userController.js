@@ -51,7 +51,6 @@ exports.registerUser = [
     if (!apellidos) missingFields.push("apellidos");
     if (!email) missingFields.push("email");
     if (!password) missingFields.push("password");
-    if (!telefono) missingFields.push("telefono");
     if (!fechaNacimiento) missingFields.push("fechaNacimiento");
     if (!dni) missingFields.push("dni");
 
@@ -149,25 +148,41 @@ exports.registerUser = [
         name: "YoElijo.digital",
         email: "info@yoelijo.digital",
       };
+
+      const variables = {
+        email: email,
+        substitutions: [
+          {
+            var: "variable1",
+            value: nombre,
+          },
+          {
+            var: "variable2",
+            value: verificationCode,
+          },
+        ],
+      };
+
       // Configurar los parámetros del correo electrónico de forma directa
       const emailParams = new EmailParams({
         from: "info@yoelijo.digital", // Correo electrónico del remitente
         fromName: "YoElijo.digital", // Nombre del remitente como texto
         to: recipients, // Lista de destinatarios
-        subject: "Código de Verificación", // Asunto
+        variables: variables, // Variables de sustitución
+        subject: "Código de Verificación:" + verificationCode, // Asunto
         template_id: "0p7kx4xvx0el9yjr", // ID de la plantilla
-        text: "Este es un mensaje automático.", // Contenido de texto mínimo
-        html: "<p>Este es un mensaje automático.</p>", // Contenido HTML mínimo
-        variables: [
+      })
+        .setTemplateId("0p7kx4xvx0el9yjr")
+        .setFrom(mail_from)
+        .setPersonalization([
           {
             email: email,
-            substitutions: [
-              { var: "variable1", value: nombre },
-              { var: "variable2", value: verificationCode },
-            ],
+            data: {
+              variable1: nombre,
+              variable2: verificationCode,
+            },
           },
-        ],
-      }).setFrom(mail_from);
+        ]);
 
       // Enviar el correo con MailerSend
       try {
