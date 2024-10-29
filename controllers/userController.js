@@ -344,3 +344,140 @@ exports.verifyCode = async (req, res) => {
     });
   }
 };
+
+exports.requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      status: "error",
+      message: "Se requiere el email.",
+    });
+  }
+
+  try {
+    const user = await Usuarios.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Usuario no encontrado.",
+      });
+    }
+
+    // Generar el código de verificación
+    const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+    // Guardar el código en la base de datos
+    user.verification_code = verificationCode;
+    await user.save();
+
+    // Configurar el remitente
+    const sender = new Sender("info@yoelijo.digital", "YoElijo.digital");
+
+    // Configurar los destinatarios
+    const recipients = [
+      new Recipient(email, `${user.nombre} ${user.apellidos}`),
+    ];
+
+    // Crear el contenido HTML del correo
+    const htmlContent = `
+    <div style="font-family: Arial, sans-serif; background-color: #000; color: #fff; padding: 20px;">
+      <div style="text-align: center;">
+        <img src="https://bucket.mailersendapp.com/neqvygmrw5l0p7w2/pxkjn4182y6lz781/images/9d597101-5811-44ee-8516-3c228935c071.png" alt="Yo Elijo Logo" style="width: 100px; margin-bottom: 20px;">
+      </div>
+      <div style="background-color: #fff; color: #000; padding: 20px; border-radius: 8px;">
+        <h3 style="margin: 0; color: #000;">Hola ${user.nombre},</h3>
+        <h1 style="color: #000; font-size: 24px; margin-top: 10px;">Verificación de Cambio de Contraseña</h1>
+        <p style="font-size: 16px; color: #333;">Has solicitado un cambio de contraseña. Usa el siguiente código de verificación para continuar con el proceso:</p>
+        <p style="font-size: 20px; font-weight: bold; color: #4CAF50; text-align: center;">${verificationCode}</p>
+        <p style="font-size: 16px; color: #333;">Si <strong>no solicitaste</strong> este cambio de contraseña, puedes ignorar este mensaje.</p>
+        <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 14px; color: #333;">Si tienes alguna pregunta o deseas más información, envíanos un mensaje a <a href="mailto:contacto@yoelijo.digital" style="color: #007A33;">contacto@yoelijo.digital</a></p>
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <img src="https://bucket.mailersendapp.com/neqvygmrw5l0p7w2/pxkjn4182y6lz781/images/9d597101-5811-44ee-8516-3c228935c071.png" alt="Yo Elijo Logo" style="width: 50px;">
+        <p style="font-size: 12px; color: #777;">© 2024 YoElijo.digital Todos los derechos reservados</p>
+        <p style="font-size: 12px; color: #777;">
+          <a href="https://yoelijo.digital/terms" style="color: #777; text-decoration: none;">Términos</a> | 
+          <a href="https://yoelijo.digital/privacy" style="color: #777; text-decoration: none;">Privacidad</a> | 
+          <a href="https://yoelijo.digital/help" style="color: #777; text-decoration: none;">Ayuda</a>
+        </p>
+      </div>
+    </div>
+  `;
+
+    // Configurar los parámetros del correo electrónico
+    const emailParams = new EmailParams()
+      .setFrom(sender) // Usar el objeto Sender como remitente
+      .setTo(recipients)
+      .setSubject("Código de verificación para cambio de contraseña")
+      .setHtml(htmlContent);
+
+    // Enviar el correo con MailerSend
+    await mailerSend.email.send(emailParams);
+    console.log("Correo de verificación enviado correctamente");
+
+    res.status(200).json({
+      status: "success",
+      message: "Código de verificación enviado al correo.",
+    });
+  } catch (error) {
+    console.error("Error enviando el correo:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error interno del servidor.",
+    });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { email, code, newPassword, confirmPassword } = req.body;
+
+  if (!email || !code || !newPassword || !confirmPassword) {
+    return res.status(400).json({
+      status: "error",
+      message: "Se requiere email, código, nueva contraseña y confirmación.",
+    });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({
+      status: "error",
+      message: "Las contraseñas no coinciden.",
+    });
+  }
+
+  try {
+    const user = await Usuarios.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Usuario no encontrado.",
+      });
+    }
+
+    if (user.verification_code !== code) {
+      return res.status(400).json({
+        status: "error",
+        message: "Código de verificación incorrecto.",
+      });
+    }
+
+    // Hashear la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.clave = hashedPassword;
+    user.verification_code = null; // Limpiar el código de verificación
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Contraseña actualizada con éxito.",
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Error interno del servidor.",
+    });
+  }
+};

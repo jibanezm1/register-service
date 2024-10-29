@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const sequelize = require("./config/database");
 const userController = require("./controllers/userController");
 const cuestionarioRoutes = require("./routes/routes");
-const respuestaRoutes = require('./routes/respuestaRoutes');
+const respuestaRoutes = require("./routes/respuestaRoutes");
 
 const cors = require("cors");
 
@@ -33,7 +33,9 @@ app.post("/register", userController.registerUser);
 app.post("/login", userController.loginUser);
 app.post("/verify-code", userController.verifyCode); // Añadir endpoint de validación de código
 app.use("/api", cuestionarioRoutes);
-app.use('/api/respuestas', respuestaRoutes);
+app.use("/api/respuestas", respuestaRoutes);
+app.post("/request-password-reset", userController.requestPasswordReset); // Endpoint para solicitud de cambio de contraseña
+app.post("/reset-password", userController.resetPassword); // Endpoint para confirmar el cambio de contraseña
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3010;
