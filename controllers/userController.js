@@ -391,6 +391,9 @@ exports.requestPasswordReset = async (req, res) => {
         <p style="font-size: 16px; color: #333;">Has solicitado un cambio de contraseña. Usa el siguiente código de verificación para continuar con el proceso:</p>
         <p style="font-size: 20px; font-weight: bold; color: #4CAF50; text-align: center;">${verificationCode}</p>
         <p style="font-size: 16px; color: #333;">Si <strong>no solicitaste</strong> este cambio de contraseña, puedes ignorar este mensaje.</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="https://yoelijo.digital/change.html" style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #007A33; border-radius: 5px; text-decoration: none; font-weight: bold;">Ir a restablecer contraseña</a>
+        </div>
         <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
         <p style="font-size: 14px; color: #333;">Si tienes alguna pregunta o deseas más información, envíanos un mensaje a <a href="mailto:contacto@yoelijo.digital" style="color: #007A33;">contacto@yoelijo.digital</a></p>
       </div>
@@ -405,6 +408,7 @@ exports.requestPasswordReset = async (req, res) => {
       </div>
     </div>
   `;
+  
 
     // Configurar los parámetros del correo electrónico
     const emailParams = new EmailParams()
