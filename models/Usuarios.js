@@ -76,6 +76,11 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.DATEONLY,
         allowNull: true,
       },
+      isVerified: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false, // Por defecto, el usuario no está verificado
+      },
       dni: {
         type: DataTypes.STRING(100), // Añadir el campo dni aquí
         allowNull: true,

@@ -235,8 +235,16 @@ exports.loginUser = async (req, res) => {
     const user = await Usuarios.findOne({ where: { email, status: 1 } });
     if (!user) {
       return res.status(404).json({
-        status: "error",
-        message: "Usuario no encontrado",
+      status: "error",
+      message: "Usuario no encontrado",
+      });
+    }
+
+    // Verificar si el usuario está verificado
+    if (!user.isVerified) {
+      return res.status(403).json({
+      status: "error",
+      message: "Usuario no verificado",
       });
     }
 
