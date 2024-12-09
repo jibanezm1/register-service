@@ -36,6 +36,7 @@ app.use("/api", cuestionarioRoutes);
 app.use("/api/respuestas", respuestaRoutes);
 app.post("/request-password-reset", userController.requestPasswordReset); // Endpoint para solicitud de cambio de contraseña
 app.post("/reset-password", userController.resetPassword); // Endpoint para confirmar el cambio de contraseña
+router.post("/disable/:idUsuario", userController.disableUser);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3010;
