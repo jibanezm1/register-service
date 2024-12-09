@@ -36,7 +36,40 @@ app.use("/api", cuestionarioRoutes);
 app.use("/api/respuestas", respuestaRoutes);
 app.post("/request-password-reset", userController.requestPasswordReset); // Endpoint para solicitud de cambio de contraseña
 app.post("/reset-password", userController.resetPassword); // Endpoint para confirmar el cambio de contraseña
-router.post("/disable/:idUsuario", userController.disableUser);
+
+// Endpoint para deshabilitar usuario
+app.post("/api/disable/:idUsuario", async (req, res) => {
+  const { idUsuario } = req.params;
+
+  try {
+    // Buscar al usuario por ID
+    const user = await Usuarios.findOne({ where: { idUsuario } });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Cambiar el estado del usuario a 1 (deshabilitado)
+    user.status = 1; // Suponiendo que 1 significa deshabilitado
+
+    // Guardar los cambios en la base de datos
+    await user.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: "Usuario deshabilitado con éxito",
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Error al deshabilitar al usuario",
+    });
+  }
+});
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3010;
