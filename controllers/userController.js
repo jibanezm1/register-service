@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Usuarios } = require("../models"); // Importar los modelos generados
+const { Usuarios, ContactForm } = require("../models"); // Importar los modelos generados
 const { S3Client } = require("@aws-sdk/client-s3");
 const { Upload } = require("@aws-sdk/lib-storage");
 const multer = require("multer");
@@ -608,6 +608,48 @@ exports.updateUser = async (req, res) => {
       code: error.code || 400,
       message: error.message || "Error al procesar la solicitud",
       data: error.stack,
+    });
+  }
+};
+
+
+exports.submitContactForm = async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+
+    // Verificar si los datos están presentes
+    if (!name || !email || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Todos los campos son obligatorios.",
+        errors: {
+          name: !name ? "El nombre es obligatorio." : null,
+          email: !email ? "El email es obligatorio." : null,
+          message: !message ? "El mensaje es obligatorio." : null,
+        },
+      });
+    }
+
+    // Crear una nueva entrada en la base de datos
+    const newContact = await ContactForm.create({ name, email, message });
+
+    if (newContact) {
+      return res.status(201).json({
+        success: true,
+        message: "Formulario recibido correctamente.",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Error al guardar los datos.",
+      });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error interno del servidor.",
+      errors: error.errors || error.stack,
     });
   }
 };

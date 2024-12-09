@@ -38,6 +38,7 @@ app.post("/request-password-reset", userController.requestPasswordReset); // End
 app.post("/reset-password", userController.resetPassword); // Endpoint para confirmar el cambio de contraseña
 app.put("/disable-user/:idUsuario", userController.disableUser);
 app.put("/update-user", userController.updateUser);
+app.post("/contacto", userController.submitContactForm);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3010;
