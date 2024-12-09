@@ -531,3 +531,83 @@ exports.disableUser = async (req, res) => {
     });
   }
 };
+
+exports.updateUser = async (req, res) => {
+  try {
+    const { idUsuario, nombre, apellidos, email, country } = req.body;
+
+    // Verificar si los campos requeridos están presentes
+    if (!idUsuario || !nombre || !apellidos || !email) {
+      return res.status(400).json({
+        status: "error",
+        message: "Se requieren todos los campos, incluido idUsuario",
+      });
+    }
+
+    // Buscar el usuario por ID
+    const user = await Usuarios.findOne({ where: { idUsuario } });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Verificar si el correo electrónico se va a cambiar y ya existe para otro usuario
+    if (user.email !== email) {
+      const existingUser = await Usuarios.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({
+          status: "error",
+          message: "El correo electrónico ya está registrado con otro usuario.",
+        });
+      }
+    }
+
+    // Actualizar los campos del usuario
+    user.nombre = nombre;
+    user.apellidos = apellidos;
+    user.email = email;
+
+    // Actualizar el país basado en el código recibido
+    switch (country) {
+      case "AR":
+        user.country_id = 3;
+        break;
+      case "BO":
+        user.country_id = 2;
+        break;
+      case "US":
+        user.country_id = 4;
+        break;
+      case "CL":
+        user.country_id = 1;
+        break;
+      default:
+        user.country_id = 0; // Valor predeterminado para países no reconocidos
+        break;
+    }
+
+    // Guardar los cambios en la base de datos
+    if (!(await user.save())) {
+      return res.status(500).json({
+        status: "error",
+        message: "Error al actualizar al usuario",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Usuario actualizado con éxito",
+      user,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(400).json({
+      status: "error",
+      code: error.code || 400,
+      message: error.message || "Error al procesar la solicitud",
+      data: error.stack,
+    });
+  }
+};
