@@ -235,16 +235,16 @@ exports.loginUser = async (req, res) => {
     const user = await Usuarios.findOne({ where: { email, status: 1 } });
     if (!user) {
       return res.status(404).json({
-      status: "error",
-      message: "Usuario no encontrado",
+        status: "error",
+        message: "Usuario no encontrado",
       });
     }
 
     // Verificar si el usuario está verificado
     if (!user.isVerified) {
       return res.status(403).json({
-      status: "error",
-      message: "Usuario no verificado",
+        status: "error",
+        message: "Usuario no verificado",
       });
     }
 
@@ -416,7 +416,6 @@ exports.requestPasswordReset = async (req, res) => {
       </div>
     </div>
   `;
-  
 
     // Configurar los parámetros del correo electrónico
     const emailParams = new EmailParams()
@@ -490,6 +489,45 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Error interno del servidor.",
+    });
+  }
+};
+
+exports.disableUser = async (req, res) => {
+  const { idUsuario } = req.params;
+
+  try {
+    // Buscar al usuario en la base de datos
+    const user = await Usuarios.findOne({ where: { idUsuario } });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Cambiar el estado del usuario (0 significa deshabilitado, ajusta según tu lógica)
+    user.status = 0;
+
+    if (!(await user.save())) {
+      return res.status(500).json({
+        status: "error",
+        message: "Error al deshabilitar al usuario",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Usuario deshabilitado con éxito",
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(400).json({
+      status: "error",
+      code: error.code || 400,
+      message: error.message || "Error al procesar la solicitud",
+      data: error.stack,
     });
   }
 };
