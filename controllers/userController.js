@@ -8,6 +8,7 @@ const Recipient = require("mailersend").Recipient;
 const EmailParams = require("mailersend").EmailParams;
 const MailerSend = require("mailersend").MailerSend;
 const Sender = require("mailersend").Sender;
+const crypto = require("crypto");
 
 // Inicializar el cliente de MailerSend con tu API Key
 const mailerSendConfig = { apiKey: process.env.TOKENMAIL }; // Asegúrate de definir TOKENMAIL en el archivo .env
@@ -507,9 +508,14 @@ exports.disableUser = async (req, res) => {
       });
     }
 
-    // Cambiar el estado del usuario (0 significa deshabilitado, ajusta según tu lógica)
+    // Cambiar el estado del usuario a 0 (deshabilitado)
     user.status = 0;
 
+    // Generar un email único para deshabilitar
+    const randomString = crypto.randomBytes(4).toString("hex"); // Genera una cadena aleatoria
+    user.email = `deshabilitado@none-${randomString}.com`;
+
+    // Guardar cambios en la base de datos
     if (!(await user.save())) {
       return res.status(500).json({
         status: "error",
@@ -611,7 +617,6 @@ exports.updateUser = async (req, res) => {
     });
   }
 };
-
 
 exports.submitContactForm = async (req, res) => {
   try {
